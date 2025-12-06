@@ -1,0 +1,188 @@
+// ==============================
+// Configuração de Motores
+// ==============================
+
+int enA = 10;
+int in1_motor1 = 7;
+int in2_motor1 = 6;
+
+int enB = 11;
+int in1_motor2 = 4;
+int in2_motor2 = 5;
+
+// ==============================
+// Sensores Ultrassônicos
+// ==============================
+
+int echo_sensor_direita = A5;
+int trigger_sensor_direita = A4;
+
+int echo_sensor_frente = A3;
+int trigger_sensor_frente = A2;
+
+int echo_sensor_esquerda = A1;
+int trigger_sensor_esquerda = A0;
+
+// -------------------------------------------------------------
+// Função auxiliar para medir distância (os alunos podem usar)
+// -------------------------------------------------------------
+long medirDistanciaCM(int triggerPin, int echoPin) {
+  long distancia;  
+  //TODO: Envia pulso do trigger
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(3);
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(triggerPin, LOW);
+  //TODO: Mede o tempo em HIGH no echo
+  long tempo = pulseIn(echoPin, HIGH, 25000);
+  //TODO: Converte microsegundos em centímetros
+  //distancia = ?
+  distancia = tempo * 0.0343 / 2;
+
+
+  return distancia;
+}
+
+
+// ==============================
+// API – SENSORES (TODO PELOS ALUNOS)
+// ==============================
+
+// Retorna true se houver parede à esquerda
+bool wallLeft() {
+  // TODO: medir a distância usando medirDistanciaCM(...)
+  // TODO: retornar true se a distância for menor que um limiar (ex.: 20 cm)
+  long distancia = medirDistanciaCM(trigger_sensor_esquerda, echo_sensor_esquerda);
+  
+  if (distancia > 0 && distancia <20) {
+    return true;
+  }
+  
+  return false; // temporário
+}
+
+// Retorna true se houver parede à frente
+bool wallFront() {
+  // TODO: medir a distância do sensor frontal
+  // TODO: retornar true se a distância < limiar
+  long distancia = medirDistanciaCM(trigger_sensor_frente, echo_sensor_frente);
+  
+  if (distancia > 0 && distancia <20) {
+    return true;
+  }
+  
+  return false; // temporário
+}
+
+// Retorna true se houver parede à direita
+bool wallRight() {
+  // TODO: medir a distância lateral direita
+  // TODO: retornar true se a distância < limiar
+  long distancia = medirDistanciaCM(trigger_sensor_direita, echo_sensor_direita);
+  
+  if (distancia > 0 && distancia <20) {
+    return true;
+  }
+  
+  return false; // temporário
+}
+
+
+// ==============================
+// API – MOTORES (TODO PELOS ALUNOS)
+// ==============================
+
+void moveForward() {
+  // TODO: configurar ambos os motores para frente
+  // Sugestão: PWM = 200 e direção = HIGH/LOW conforme o wiring
+  analogWrite(enA, 200);
+  analogWrite(enB, 200);
+  
+  digitalWrite(in1_motor1, HIGH);
+  digitalWrite(in2_motor1, LOW);
+  
+  digitalWrite(in1_motor2, HIGH);
+  digitalWrite(in2_motor2, LOW);
+}
+
+void turnLeft() {
+  // TODO: fazer curva à esquerda
+  // Exemplo: motor esquerdo para trás, motor direito para frente
+  analogWrite(enA, 200);
+  analogWrite(enB, 200);
+  
+  digitalWrite(in1_motor1, LOW);
+  digitalWrite(in2_motor1, HIGH);
+  
+  digitalWrite(in1_motor2, HIGH);
+  digitalWrite(in2_motor2, LOW);
+  
+  delay(300);
+}
+
+void turnRight() {
+  // TODO: curva à direita
+  // Exemplo: motor direito para trás, motor esquerdo para frente
+  analogWrite(enA, 200);
+  analogWrite(enB, 200);
+  
+  digitalWrite(in1_motor1, HIGH);
+  digitalWrite(in2_motor1, LOW);
+  
+  digitalWrite(in1_motor2, LOW);
+  digitalWrite(in2_motor2, HIGH);
+  
+  delay(300);
+}
+
+
+// ==============================
+// SETUP
+// ==============================
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(enA, OUTPUT);
+  pinMode(in1_motor1, OUTPUT);
+  pinMode(in2_motor1, OUTPUT);
+
+  pinMode(enB, OUTPUT);
+  pinMode(in1_motor2, OUTPUT);
+  pinMode(in2_motor2, OUTPUT);
+
+  pinMode(trigger_sensor_esquerda, OUTPUT);
+  pinMode(echo_sensor_esquerda, INPUT);
+
+  pinMode(trigger_sensor_frente, OUTPUT);
+  pinMode(echo_sensor_frente, INPUT);
+
+  pinMode(trigger_sensor_direita, OUTPUT);
+  pinMode(echo_sensor_direita, INPUT);
+}
+
+
+// ==============================
+// LOOP PRINCIPAL (EXEMPLO)
+// ==============================
+
+void loop() {
+
+  // Exemplo de navegação simples estilo seguidor de parede:
+  
+  if (wallFront()) {
+    // Obstáculo à frente → virar para o lado com mais espaço
+    if (!wallLeft()) {
+      turnLeft();
+    } else {
+      turnRight();
+    }
+  } 
+  else {
+    // Sem obstáculo → segue em frente
+    moveForward();
+  }
+
+  delay(100);
+}
