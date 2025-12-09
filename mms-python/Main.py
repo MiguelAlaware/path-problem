@@ -11,10 +11,6 @@ maze_size = 16
 walls = np.zeros((maze_size, maze_size), dtype=int)
 flood = np.full((maze_size, maze_size), -1, dtype=int)
 
-# Marking the center of the map
-for r in range(7,9):
-    for c in range(7, 9):
-        flood[r, c] = 0
 
 def flood_update():
     flood.fill(-1)
@@ -30,10 +26,10 @@ def flood_update():
         r, c = queue.popleft()
         dist = flood[r, c]
     
-    path = [(1, 1, 0), (2, 0, 1), (4, -1, 0), (8, 0, -1)]
+        path = [(1, 1, 0), (2, 0, 1), (4, -1, 0), (8, 0, -1)]
 
-    for bit, dr, dc in path:
-        nr, nc = r + dr, c + dc
+        for bit, dr, dc in path:
+            nr, nc = r + dr, c + dc
 
         if 0 <= nr < maze_size and 0 <= nc < maze_size:
             if (walls[r, c] & bit) == 0:
@@ -48,7 +44,8 @@ def main():
     x = 0
     y = 0
     orient = 0
-
+    
+    flood_update()
 
     while True:
        new_wall = False 
@@ -84,10 +81,12 @@ def main():
     lowest_value = 9999
     
     ndistance = flood[y, x]
-
+    
     for d in range(4):
-        if (wall[y, x] & (1 << d)) != 0:
+        if (walls[y, x] & (1 << d)) != 0:
             continue
+        
+        nx, ny = x, y 
         if d == 0: ny += 1
         if d == 1: nx += 1
         if d == 2: ny -= 1
@@ -116,11 +115,14 @@ def main():
             if orient == 0: y += 1
             if orient == 1: x += 1
             if orient == 2: y -= 1
-            if orient == 3: z -= 1
+            if orient == 3: x -= 1
         else:
             log("Preso")
-            break
-
+            if flood[y, x] == 0:
+                log("Arrived")
+                API.setColor(x, y, "B")
+                break
+            
 if __name__ == "__main__":                        
      main()
 
